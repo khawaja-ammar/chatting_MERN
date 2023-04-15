@@ -1,0 +1,58 @@
+POST http://www.localhost:3500/register
+content-type: application/json
+
+{
+    "user": "ayesha",
+    "pwd": "156"
+}
+###
+POST http://www.localhost:3500/auth
+content-type: application/json
+
+{
+    "user": "ammar",
+    "pwd": "156"
+}
+
+###
+GET http://www.localhost:3500/refresh
+content-type: application/json
+
+{
+    "user": "ammar",
+    "pwd": "156"
+}
+
+###
+GET http://www.localhost:3500/logout
+content-type: application/json
+
+{
+    "user": "ammar",
+    "pwd": "156"
+}
+
+###
+
+PUT http://www.localhost:3500/contacts
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySW5mbyI6eyJ1c2VybmFtZSI6ImF5ZXNoYSJ9LCJpYXQiOjE2ODE0NTQxNDcsImV4cCI6MTY4MTQ1NTA0N30.pVQfN5UbadrFRf-E6KOT9ZLW7_YxRiiIEbS5a4_4A5E
+content-type: application/json
+
+{
+    "contact":"ammar"
+}
+
+###
+GET http://www.localhost:3500/contacts
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySW5mbyI6eyJ1c2VybmFtZSI6ImFtbWFyIn0sImlhdCI6MTY4MTQ1NDYwMSwiZXhwIjoxNjgxNDU1NTAxfQ.BNkT_ivbq7TwEZwNrjSM9DqSBnrCqw3l1TliFh94krA
+
+###
+
+PUT http://www.localhost:3500/contacts
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySW5mbyI6eyJ1c2VybmFtZSI6ImF5ZXNoYSJ9LCJpYXQiOjE2ODE0NTQxNDcsImV4cCI6MTY4MTQ1NTA0N30.pVQfN5UbadrFRf-E6KOT9ZLW7_YxRiiIEbS5a4_4A5E
+content-type: application/json
+
+{
+    "contact":"ammar",
+    "msg": "What up dog how are you doing today my man how is it going these days etc"
+}
