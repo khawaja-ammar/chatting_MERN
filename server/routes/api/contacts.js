@@ -6,5 +6,6 @@ router
 	.route('/')
 	.get(contactController.getContacts)
 	.put(contactController.addContact);
+// DELETE
 
 module.exports = router;

@@ -12,7 +12,6 @@ const getChats = async (req, res) => {
 		return res.status(400).json({ message: 'Invalid User' });
 	}
 
-	const arr = [];
 	if (user.contacts.length == 0)
 		return res.status(200).json({ message: 'No contacts' });
 
