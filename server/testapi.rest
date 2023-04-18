@@ -10,7 +10,7 @@ POST http://www.localhost:3500/auth
 content-type: application/json
 
 {
-    "user": "ammar",
+    "user": "ayesha",
     "pwd": "156"
 }
 
@@ -35,24 +35,17 @@ content-type: application/json
 ###
 
 PUT http://www.localhost:3500/contacts
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySW5mbyI6eyJ1c2VybmFtZSI6ImF5ZXNoYSJ9LCJpYXQiOjE2ODE0NTQxNDcsImV4cCI6MTY4MTQ1NTA0N30.pVQfN5UbadrFRf-E6KOT9ZLW7_YxRiiIEbS5a4_4A5E
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySW5mbyI6eyJ1c2VybmFtZSI6ImF5ZXNoYSJ9LCJpYXQiOjE2ODE4MDkwMjksImV4cCI6MTY4MTgwOTkyOX0.B1vH6jYWbiqTz57mfzP8CSx1mLsOX8E5cKaEcrf8Vug
 content-type: application/json
 
 {
-    "contact":"ammar"
+    "contact":"tom"
 }
 
 ###
 GET http://www.localhost:3500/contacts
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySW5mbyI6eyJ1c2VybmFtZSI6ImFtbWFyIn0sImlhdCI6MTY4MTQ1NDYwMSwiZXhwIjoxNjgxNDU1NTAxfQ.BNkT_ivbq7TwEZwNrjSM9DqSBnrCqw3l1TliFh94krA
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySW5mbyI6eyJ1c2VybmFtZSI6ImFtbWFyIn0sImlhdCI6MTY4MTgwNTQ2OSwiZXhwIjoxNjgxODA2MzY5fQ.QYUdyI9l7zfi-2CKrRM2dzEzU6USpE0NyWJ2wxc0VzU
 
 ###
-
-PUT http://www.localhost:3500/contacts
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySW5mbyI6eyJ1c2VybmFtZSI6ImF5ZXNoYSJ9LCJpYXQiOjE2ODE0NTQxNDcsImV4cCI6MTY4MTQ1NTA0N30.pVQfN5UbadrFRf-E6KOT9ZLW7_YxRiiIEbS5a4_4A5E
-content-type: application/json
-
-{
-    "contact":"ammar",
-    "msg": "What up dog how are you doing today my man how is it going these days etc"
-}
+GET http://www.localhost:3500/chats/ammar
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySW5mbyI6eyJ1c2VybmFtZSI6ImF5ZXNoYSJ9LCJpYXQiOjE2ODE4MTI2ODMsImV4cCI6MTY4MTgxMzU4M30.YazzRYP4u_FCIQzBb3pJ0lkkS-Gx4rC2u3h5v5DlNww

@@ -47,22 +47,35 @@ app.use('/logout', require('./routes/logout'));
 // API Routes
 app.use(verifyJWT);
 app.use('/contacts', require('./routes/api/contacts'));
+app.use('/chats', require('./routes/api/chats'));
 
 // io.use(verifySocket);
+const activeUsers = new Map();
+
 io.on('connection', (socket) => {
+	const sender = socket.handshake.auth.user;
 	console.log('new connection');
+	activeUsers.set(sender, socket);
+	// sync all message from DB
 
 	socket.on('socket/send_msg', (receiver, msg) => {
-		const res = socketController.sendMessage(
-			socket.handshake.auth.user,
-			receiver,
-			msg
-		);
+		(async () => {
+			const res = await socketController.addMessageDB(sender, receiver, msg);
+			console.log(res);
+			if (res == 'ok') {
+				const sendSocket = activeUsers.get(receiver);
+				if (sendSocket) sendSocket.emit('socket/recv_msg', sender, msg);
+			}
+			socket.emit('socket/send_msg/resp', res);
+		})();
+
+		// If user online send message now
 	});
 	// check if the chat exists in DB, add to chat and push msg to the reciever's DB
 
 	socket.on('disconnect', () => {
-		console.log('closed connection');
+		console.log('client dc');
+		activeUsers.delete(socket.handshake.auth.user);
 	});
 });
 
