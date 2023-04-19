@@ -32,19 +32,19 @@ const contactSchema = require('./Contact');
 // });
 
 const userSchema = new Schema({
-	username: {
-		type: String,
-		required: true,
-	},
-	password: {
-		type: String,
-		required: true,
-	},
-	refreshToken: String,
-	contacts: {
-		type: [contactSchema],
-		default: [],
-	},
+    username: {
+        type: String,
+        required: true,
+    },
+    password: {
+        type: String,
+        required: true,
+    },
+    refreshToken: String,
+    contacts: {
+        type: [contactSchema],
+        default: [],
+    },
 });
 
 module.exports = mongoose.model('User', userSchema);

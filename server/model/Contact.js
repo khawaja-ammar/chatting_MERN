@@ -4,14 +4,14 @@ const Schema = mongoose.Schema;
 const messageSchema = require('./Message');
 
 const contactSchema = new Schema({
-	username: {
-		type: String,
-		required: true,
-	},
-	chat: {
-		type: [messageSchema],
-		default: undefined,
-	},
+    username: {
+        type: String,
+        required: true,
+    },
+    chat: {
+        type: [messageSchema],
+        default: undefined,
+    },
 });
 
 module.exports = contactSchema;

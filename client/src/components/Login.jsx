@@ -10,111 +10,111 @@ const LOGIN_URL = '/auth';
 // import { useDarkMode } from '../contexts/DarkModeProvider';
 
 export default function Login() {
-	const { setAuth } = useAuth();
+    const { setAuth } = useAuth();
 
-	const navigate = useNavigate();
-	const location = useLocation();
-	const from = location.state?.from?.pathname || '/';
+    const navigate = useNavigate();
+    const location = useLocation();
+    const from = location.state?.from?.pathname || '/';
 
-	const userRef = useRef();
-	const errRef = useRef();
+    const userRef = useRef();
+    const errRef = useRef();
 
-	const [user, setUser] = useState('');
-	const [password, setPassword] = useState('');
-	const [errMsg, setErrMsg] = useState('');
+    const [user, setUser] = useState('');
+    const [password, setPassword] = useState('');
+    const [errMsg, setErrMsg] = useState('');
 
-	useEffect(() => {
-		userRef.current.focus();
-	}, []);
+    useEffect(() => {
+        userRef.current.focus();
+    }, []);
 
-	useEffect(() => {
-		setErrMsg('');
-	}, [user, password]);
+    useEffect(() => {
+        setErrMsg('');
+    }, [user, password]);
 
-	const handleSubmit = async (e) => {
-		e.preventDefault();
-		console.log('form sub');
-		// communicate with server?
-		try {
-			const res = await axios.post(
-				LOGIN_URL,
-				JSON.stringify({
-					user: user,
-					pwd: password,
-				}),
-				{
-					headers: { 'Content-Type': 'application/json' },
-					withCredentials: true,
-				}
-			);
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        console.log('form sub');
+        // communicate with server?
+        try {
+            const res = await axios.post(
+                LOGIN_URL,
+                JSON.stringify({
+                    user: user,
+                    pwd: password,
+                }),
+                {
+                    headers: { 'Content-Type': 'application/json' },
+                    withCredentials: true,
+                }
+            );
 
-			console.log('RESP: ', res);
+            console.log('RESP: ', res);
 
-			setAuth({
-				state: true,
-				userID: user,
-				accessToken: res.data.accessToken,
-			});
-			setUser('');
-			setPassword('');
+            setAuth({
+                state: true,
+                userID: user,
+                accessToken: res.data.accessToken,
+            });
+            setUser('');
+            setPassword('');
 
-			navigate(from, { replace: true });
-		} catch (err) {
-			console.log('ERROR: ', err);
+            navigate(from, { replace: true });
+        } catch (err) {
+            console.log('ERROR: ', err);
 
-			setErrMsg('ERROR');
+            setErrMsg('ERROR');
 
-			errRef.current.focus();
-		}
-	};
+            errRef.current.focus();
+        }
+    };
 
-	return (
-		<section className="flex h-full flex-col justify-center">
-			<div className="flex flex-col items-center justify-center gap-1">
-				<p
-					ref={errRef}
-					className={errMsg ? '' : 'hidden'}
-					aria-live="assertive"
-				>
-					{errMsg}
-				</p>
-				<span className="text-2xl">LOGIN PAGE</span>
-				<form className="flex flex-col gap-1 " onSubmit={handleSubmit}>
-					<label htmlFor="user">User:</label>
-					<input
-						className="input-bordered input input-sm w-80 "
-						id="user"
-						type="text"
-						value={user}
-						onChange={(e) => setUser(e.target.value)}
-						required
-						ref={userRef}
-						autoComplete="off"
-					/>
+    return (
+        <section className="flex h-full flex-col justify-center">
+            <div className="flex flex-col items-center justify-center gap-1">
+                <p
+                    ref={errRef}
+                    className={errMsg ? '' : 'hidden'}
+                    aria-live="assertive"
+                >
+                    {errMsg}
+                </p>
+                <span className="text-2xl">LOGIN PAGE</span>
+                <form className="flex flex-col gap-1 " onSubmit={handleSubmit}>
+                    <label htmlFor="user">User:</label>
+                    <input
+                        className="input-bordered input input-sm w-80 "
+                        id="user"
+                        type="text"
+                        value={user}
+                        onChange={(e) => setUser(e.target.value)}
+                        required
+                        ref={userRef}
+                        autoComplete="off"
+                    />
 
-					<label htmlFor="password">Password:</label>
-					<input
-						className="input-bordered input input-sm w-80"
-						id="password"
-						type="password"
-						value={password}
-						onChange={(e) => setPassword(e.target.value)}
-						required
-					/>
+                    <label htmlFor="password">Password:</label>
+                    <input
+                        className="input-bordered input input-sm w-80"
+                        id="password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                    />
 
-					<button className="btn-sm btn mb-3 mt-3" type="submit">
-						Login
-					</button>
-				</form>
-				<p className="flex justify-between gap-10">
-					<span>Need an Account?</span>
-					<span>
-						<Link className="link-primary link" to="/register">
-							Sign Up
-						</Link>
-					</span>
-				</p>
-			</div>
-		</section>
-	);
+                    <button className="btn-sm btn mb-3 mt-3" type="submit">
+                        Login
+                    </button>
+                </form>
+                <p className="flex justify-between gap-10">
+                    <span>Need an Account?</span>
+                    <span>
+                        <Link className="link-primary link" to="/register">
+                            Sign Up
+                        </Link>
+                    </span>
+                </p>
+            </div>
+        </section>
+    );
 }

@@ -13,50 +13,50 @@ import Dashboard from './components/Dashboard';
 import Signout from './components/Signout';
 
 function App() {
-	const val = useAuth();
-	// console.log(val.auth);
-	// val.setAuth(true);
-	// console.log(val);
-	// val.setAuth(true);
+    const val = useAuth();
+    // console.log(val.auth);
+    // val.setAuth(true);
+    // console.log(val);
+    // val.setAuth(true);
 
-	return (
-		<Routes>
-			<Route path="/" element={<Layout />}>
-				{/* PUBLIC */}
-				<Route path="login" element={<Login />} />
-				<Route path="register" element={<Register />} />
-				<Route path="logout" element={<Logout />} />
-				<Route path="signout" element={<Signout />} />
+    return (
+        <Routes>
+            <Route path="/" element={<Layout />}>
+                {/* PUBLIC */}
+                <Route path="login" element={<Login />} />
+                <Route path="register" element={<Register />} />
+                <Route path="logout" element={<Logout />} />
+                <Route path="signout" element={<Signout />} />
 
-				{/* PRIVATE ROUTES */}
-				<Route element={<RequireAuth />}>
-					<Route path="/" element={<Dashboard />} />
-				</Route>
+                {/* PRIVATE ROUTES */}
+                <Route element={<RequireAuth />}>
+                    <Route path="/" element={<Dashboard />} />
+                </Route>
 
-				{/* <Route path='*' element={<Page404 />} /> */}
-			</Route>
-		</Routes>
-	);
+                {/* <Route path='*' element={<Page404 />} /> */}
+            </Route>
+        </Routes>
+    );
 }
 
 function Layout() {
-	return (
-		<>
-			<div className="flex h-screen flex-col">
-				{/*NAVBAR || HEADER  */}
-				<NavWrapper />
+    return (
+        <>
+            <div className="flex h-screen flex-col">
+                {/*NAVBAR || HEADER  */}
+                <NavWrapper />
 
-				{/*Main Outlet */}
-				<main className="flex-1">
-					<Outlet />
-				</main>
+                {/*Main Outlet */}
+                <main className="flex-1">
+                    <Outlet />
+                </main>
 
-				{/* <p>Hi</p> */}
+                {/* <p>Hi</p> */}
 
-				{/*FOOTER */}
-			</div>
-		</>
-	);
+                {/*FOOTER */}
+            </div>
+        </>
+    );
 }
 
 export default App;

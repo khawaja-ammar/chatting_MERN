@@ -8,15 +8,15 @@ import { AuthProvider } from './contexts/AuthProvider';
 import { DarkModeProvider } from './contexts/DarkModeProvider';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-	<React.StrictMode>
-		<BrowserRouter>
-			<AuthProvider>
-				<DarkModeProvider>
-					<Routes>
-						<Route path="/*" element={<App />} />
-					</Routes>
-				</DarkModeProvider>
-			</AuthProvider>
-		</BrowserRouter>
-	</React.StrictMode>
+    <React.StrictMode>
+        <BrowserRouter>
+            <AuthProvider>
+                <DarkModeProvider>
+                    <Routes>
+                        <Route path="/*" element={<App />} />
+                    </Routes>
+                </DarkModeProvider>
+            </AuthProvider>
+        </BrowserRouter>
+    </React.StrictMode>
 );

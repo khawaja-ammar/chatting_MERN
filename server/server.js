@@ -52,31 +52,35 @@ app.use('/chats', require('./routes/api/chats'));
 const activeUsers = new Map();
 
 io.on('connection', (socket) => {
-	const sender = socket.handshake.auth.user;
-	console.log('new connection');
-	activeUsers.set(sender, socket);
+    const sender = socket.handshake.auth.user;
+    console.log('new connection');
+    activeUsers.set(sender, socket);
 
-	socket.on('socket/send_msg', (receiver, msg) => {
-		(async () => {
-			const res = await socketController.addMessageDB(sender, receiver, msg);
-			console.log(res);
-			if (res == 'ok') {
-				const sendSocket = activeUsers.get(receiver);
-				if (sendSocket) sendSocket.emit('socket/recv_msg', sender, msg);
-			}
-			socket.emit('socket/send_msg/resp', res);
-		})();
-	});
+    socket.on('socket/send_msg', (receiver, msg) => {
+        (async () => {
+            const res = await socketController.addMessageDB(
+                sender,
+                receiver,
+                msg
+            );
+            console.log(res);
+            if (res == 'ok') {
+                const sendSocket = activeUsers.get(receiver);
+                if (sendSocket) sendSocket.emit('socket/recv_msg', sender, msg);
+            }
+            socket.emit('socket/send_msg/resp', res);
+        })();
+    });
 
-	socket.on('disconnect', () => {
-		console.log('client dc');
-		activeUsers.delete(socket.handshake.auth.user);
-	});
+    socket.on('disconnect', () => {
+        console.log('client dc');
+        activeUsers.delete(socket.handshake.auth.user);
+    });
 });
 
 // Invalid URLs
 app.all('*', (req, res) => {
-	res.status(404);
+    res.status(404);
 });
 
 // Error Handling
@@ -84,6 +88,6 @@ app.use(errorHandler);
 
 // Listen only when we connected to DB
 mongoose.connection.once('open', () => {
-	console.log('Connected to MongoDB');
-	http.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    console.log('Connected to MongoDB');
+    http.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 });
