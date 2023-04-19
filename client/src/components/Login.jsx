@@ -1,8 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 
-// import { useDarkMode } from '../contexts/DarkModeProvider';
 import { useAuth } from '../contexts/AuthProvider';
+
+import axios from '../api/axios';
+
+const LOGIN_URL = '/auth';
+
+// import { useDarkMode } from '../contexts/DarkModeProvider';
 
 export default function Login() {
 	const { setAuth } = useAuth();
@@ -11,38 +16,57 @@ export default function Login() {
 	const location = useLocation();
 	const from = location.state?.from?.pathname || '/';
 
-	const emailRef = useRef();
+	const userRef = useRef();
 	const errRef = useRef();
 
-	const [email, setEmail] = useState('');
+	const [user, setUser] = useState('');
 	const [password, setPassword] = useState('');
 	const [errMsg, setErrMsg] = useState('');
 
 	useEffect(() => {
-		emailRef.current.focus();
+		userRef.current.focus();
 	}, []);
 
 	useEffect(() => {
 		setErrMsg('');
-	}, [email, password]);
+	}, [user, password]);
 
-	function handleSubmit(e) {
+	const handleSubmit = async (e) => {
 		e.preventDefault();
 		console.log('form sub');
 		// communicate with server?
+		try {
+			const res = await axios.post(
+				LOGIN_URL,
+				JSON.stringify({
+					user: user,
+					pwd: password,
+				}),
+				{
+					headers: { 'Content-Type': 'application/json' },
+					withCredentials: true,
+				}
+			);
 
-		setAuth({
-			state: true,
-			userID: '',
-			password: '',
-			refreshToken: '',
-			accessToken: '',
-		});
-		setEmail('');
-		setPassword('');
+			console.log('RESP: ', res);
 
-		navigate(from, { replace: true });
-	}
+			setAuth({
+				state: true,
+				userID: user,
+				accessToken: res.data.accessToken,
+			});
+			setUser('');
+			setPassword('');
+
+			navigate(from, { replace: true });
+		} catch (err) {
+			console.log('ERROR: ', err);
+
+			setErrMsg('ERROR');
+
+			errRef.current.focus();
+		}
+	};
 
 	return (
 		<section className="flex h-full flex-col justify-center">
@@ -56,15 +80,15 @@ export default function Login() {
 				</p>
 				<span className="text-2xl">LOGIN PAGE</span>
 				<form className="flex flex-col gap-1 " onSubmit={handleSubmit}>
-					<label htmlFor="email">Email:</label>
+					<label htmlFor="user">User:</label>
 					<input
 						className="input-bordered input input-sm w-80 "
-						id="email"
+						id="user"
 						type="text"
-						value={email}
-						onChange={(e) => setEmail(e.target.value)}
+						value={user}
+						onChange={(e) => setUser(e.target.value)}
 						required
-						ref={emailRef}
+						ref={userRef}
 						autoComplete="off"
 					/>
 

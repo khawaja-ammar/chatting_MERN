@@ -26,7 +26,6 @@ const socketController = require('./controllers/socketController');
 // Connect to MongoDB
 connectDB();
 
-// custom middleware logger
 app.use(logger);
 
 app.use(cors(corsOptions));
@@ -56,7 +55,6 @@ io.on('connection', (socket) => {
 	const sender = socket.handshake.auth.user;
 	console.log('new connection');
 	activeUsers.set(sender, socket);
-	// sync all message from DB
 
 	socket.on('socket/send_msg', (receiver, msg) => {
 		(async () => {
@@ -68,10 +66,7 @@ io.on('connection', (socket) => {
 			}
 			socket.emit('socket/send_msg/resp', res);
 		})();
-
-		// If user online send message now
 	});
-	// check if the chat exists in DB, add to chat and push msg to the reciever's DB
 
 	socket.on('disconnect', () => {
 		console.log('client dc');

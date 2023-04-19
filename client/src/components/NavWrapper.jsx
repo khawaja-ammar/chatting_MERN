@@ -1,9 +1,15 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useDarkMode } from '../contexts/DarkModeProvider';
+import { useAuth } from '../contexts/AuthProvider';
 
 export default function NavWrapper() {
 	const { darkMode, setDarkMode } = useDarkMode();
 	const location = useLocation().pathname;
+
+	const { auth } = useAuth();
+	const displayName = auth.userID;
+
+	console.log('NAV', auth);
 
 	return (
 		<>
@@ -55,23 +61,24 @@ export default function NavWrapper() {
 				</div>
 
 				<div className="navbar-end max-sm:text-sm">
-					{location == '/register' ? (
+					{location === '/register' ? (
 						<Link to="/login" className="link">
 							<p>Log In</p>
 						</Link>
-					) : location == '/login' ? (
+					) : location === '/login' ? (
 						<></>
-					) : location == '/signout' ? (
+					) : location === '/signout' ? (
 						<Link to="/login" className="link">
 							<p>Log In</p>
 						</Link>
 					) : (
-						// Add username welcome etc
 						<>
-							<p>Hello User</p>
-							<Link to="/signout" className="link">
-								<p>Sign Out</p>
-							</Link>
+							<p>
+								<span>{`Signed In as ${displayName}`}</span>{' '}
+								<Link to="/signout" className="link">
+									<span>Sign Out</span>
+								</Link>
+							</p>
 						</>
 					)}
 				</div>

@@ -13,6 +13,7 @@ BackEnd:
 Node JS
 Express
 Socket IO
+Mongoose
 
 Database:
 MongoDB

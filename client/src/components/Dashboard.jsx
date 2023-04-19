@@ -1,4 +1,25 @@
 import React from 'react';
+import { useAuth } from '../contexts/AuthProvider';
+import axios from '../api/axios';
+
+const ADDCONTACT_URL = '/contacts';
+
+const svgPLUS = (
+	<svg
+		xmlns="http://www.w3.org/2000/svg"
+		fill="none"
+		viewBox="0 0 24 24"
+		strokeWidth={1.5}
+		stroke="currentColor"
+		className="h-6 w-6"
+	>
+		<path
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			d="M12 4.5v15m7.5-7.5h-15"
+		/>
+	</svg>
+);
 
 function makeList() {
 	return (
@@ -185,6 +206,54 @@ function makeChat() {
 	);
 }
 
+function addContactModal() {
+	const { auth } = useAuth;
+
+	const onSubmit = async (e) => {
+		e.preventDefault();
+
+		try {
+			const res = axios.put(
+				ADDCONTACT_URL,
+				JSON.stringify({
+					contact: 0,
+				})
+			);
+		} catch (err) {}
+	};
+
+	return (
+		<>
+			<label htmlFor="my-modal-3" className="btn-sm btn-square btn">
+				{svgPLUS}
+			</label>
+			<input type="checkbox" id="my-modal-3" className="modal-toggle" />
+			<div className="modal">
+				<div className="modal-box relative">
+					<label
+						htmlFor="my-modal-3"
+						className="btn-sm btn-circle btn absolute right-2 top-2"
+					>
+						✕
+					</label>
+					<h3 className="text-lg font-bold">ADD NEW CONTACT</h3>
+					<form className="flex justify-between gap-2 py-4" onSubmit={onSubmit}>
+						<input
+							type="text"
+							placeholder="Contact Name"
+							className="input-bordered input w-full max-w-xs"
+						/>
+						<button className="btn" type="submit">
+							ADD Contact
+						</button>
+					</form>
+					<div>{/* TODO: ERROR MESSAGE */}</div>
+				</div>
+			</div>
+		</>
+	);
+}
+
 export default function Dashboard() {
 	return (
 		<>
@@ -198,7 +267,10 @@ export default function Dashboard() {
 									className="border-b-4 border-[color:var(--color-border)] "
 								/>
 
-								<div className="py-4">Contacts</div>
+								<div className="flex items-center justify-between p-4">
+									<p>Contacts</p>
+									{addContactModal()}
+								</div>
 								<div
 									w-full
 									className="border-b-4 border-[color:var(--color-border)] pr-8"

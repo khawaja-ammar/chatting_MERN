@@ -16,13 +16,13 @@ export function AuthProvider({ children }) {
 	// const authRef = useRef(false);
 	const [auth, setAuth] = useState(() => {
 		return {
-			state: true,
+			state: false,
 			userID: '',
-			password: '',
-			refreshToken: '',
 			accessToken: '',
 		};
 	});
+	// TODO: For refreshing a page
+	// get new AccessToken if current one is invalid
 
 	useEffect(() => {
 		// console.log('');

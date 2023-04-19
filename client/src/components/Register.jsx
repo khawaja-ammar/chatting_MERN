@@ -2,66 +2,46 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from '../api/axios';
 
-const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
-const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
 const REGISTER_URL = '/register';
 
-function tick() {
-	return (
-		<svg
-			xmlns="http://www.w3.org/2000/svg"
-			fill="none"
-			viewBox="0 0 24 24"
-			strokeWidth={1.5}
-			stroke="currentColor"
-			className="h-6 w-6"
-		>
-			<path
-				strokeLinecap="round"
-				strokeLinejoin="round"
-				d="M4.5 12.75l6 6 9-13.5"
-			/>
-		</svg>
-	);
-}
+const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
+// FIXME:
+// const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
+const PWD_REGEX = /^.{3,24}$/;
 
-function cross() {
-	return (
-		<svg
-			xmlns="http://www.w3.org/2000/svg"
-			fill="none"
-			viewBox="0 0 24 24"
-			strokeWidth={1.5}
-			stroke="currentColor"
-			className="h-6 w-6"
-		>
-			<path
-				strokeLinecap="round"
-				strokeLinejoin="round"
-				d="M6 18L18 6M6 6l12 12"
-			/>
-		</svg>
-	);
-}
+const svgTick = (
+	<svg
+		xmlns="http://www.w3.org/2000/svg"
+		fill="none"
+		viewBox="0 0 24 24"
+		strokeWidth={1.5}
+		stroke="currentColor"
+		className="h-6 w-6"
+	>
+		<path
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			d="M4.5 12.75l6 6 9-13.5"
+		/>
+	</svg>
+);
 
-// function exclaim() {
-// 	return (
-// 		<svg
-// 			xmlns="http://www.w3.org/2000/svg"
-// 			fill="none"
-// 			viewBox="0 0 24 24"
-// 			strokeWidth={1.5}
-// 			stroke="currentColor"
-// 			className="h-6 w-6"
-// 		>
-// 			<path
-// 				strokeLinecap="round"
-// 				strokeLinejoin="round"
-// 				d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
-// 			/>
-// 		</svg>
-// 	);
-// }
+const svgCross = (
+	<svg
+		xmlns="http://www.w3.org/2000/svg"
+		fill="none"
+		viewBox="0 0 24 24"
+		strokeWidth={1.5}
+		stroke="currentColor"
+		className="h-6 w-6"
+	>
+		<path
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			d="M6 18L18 6M6 6l12 12"
+		/>
+	</svg>
+);
 
 export default function Login() {
 	const navigate = useNavigate();
@@ -77,10 +57,6 @@ export default function Login() {
 	const [validPassword, setValidPassword] = useState(false);
 	const [passwordFocus, setPasswordFocus] = useState(false);
 
-	const [matchPassword, setMatchPassword] = useState('');
-	const [validMatch, setValidMatch] = useState(false);
-	const [matchFocus, setMatchFocus] = useState(false);
-
 	const [errMsg, setErrMsg] = useState('');
 
 	useEffect(() => {
@@ -93,29 +69,26 @@ export default function Login() {
 
 	useEffect(() => {
 		setValidPassword(PWD_REGEX.test(password));
-		setValidMatch(password === matchPassword);
-	}, [password, matchPassword]);
+	}, [password]);
 
 	useEffect(() => {
 		setErrMsg('');
-	}, [user, password, matchPassword]);
+	}, [user, password]);
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 
-		const v1 = USER_REGEX.test(user);
-		// FIXME:
-		// const v2 = PWD_REGEX.test(password);
-		const v2 = true;
+		const check1 = USER_REGEX.test(user);
+		const check2 = PWD_REGEX.test(password);
 
-		if (!v1 || !v2) {
+		if (!check1 || !check2) {
 			setErrMsg('Invalid Entry');
 			return;
 		}
 
 		// communicate with server
 		try {
-			const response = await axios.post(
+			const res = await axios.post(
 				REGISTER_URL,
 				JSON.stringify({
 					user: user,
@@ -127,11 +100,14 @@ export default function Login() {
 				}
 			);
 
+			console.log('RESP: ', res);
+
 			setUser('');
 			setPassword('');
 
 			navigate('/login');
 		} catch (err) {
+			console.log('ERROR: ', err);
 			if (!err?.response) {
 				setErrMsg('No Server Response');
 			} else if (err.response?.status === 409) {
@@ -158,10 +134,10 @@ export default function Login() {
 					<label htmlFor="user" className="flex">
 						<span>Username:</span>
 						<span className={validName ? 'text-green-700' : 'hidden'}>
-							{tick()}
+							{svgTick}
 						</span>
 						<span className={validName || !user ? 'hidden' : 'text-red-600'}>
-							{cross()}
+							{svgCross}
 						</span>
 					</label>
 					<input
@@ -193,7 +169,17 @@ export default function Login() {
 						Letters, numbers, underscores, hyphens allowed.
 					</p>
 
-					<label htmlFor="password">Password:</label>
+					<label htmlFor="password" className="flex">
+						<span>Password:</span>
+						<span className={validPassword ? 'text-green-700' : 'hidden'}>
+							{svgTick}
+						</span>
+						<span
+							className={validPassword || !password ? 'hidden' : 'text-red-600'}
+						>
+							{svgCross}
+						</span>
+					</label>
 					<input
 						className="input-bordered input input-sm w-80"
 						id="password"
