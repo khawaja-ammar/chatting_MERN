@@ -1,7 +1,7 @@
 import { Outlet, Route, Routes } from 'react-router-dom';
 // import './App.css';
 
-import { useAuth } from './contexts/AuthProvider';
+// import { useAuth } from './contexts/AuthProvider';
 
 import RequireAuth from './components/RequireAuth';
 
@@ -13,7 +13,8 @@ import Dashboard from './components/Dashboard';
 import Signout from './components/Signout';
 
 function App() {
-    const val = useAuth();
+    // const val = useAuth();
+
     // console.log(val.auth);
     // val.setAuth(true);
     // console.log(val);

@@ -3,10 +3,13 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const http = require('http').Server(app);
-const io = require('socket.io')(http);
+// const io = require('socket.io')(http)
 
 const cors = require('cors');
 const corsOptions = require('./config/corsOptions');
+const io = require('socket.io')(http, {
+    cors: corsOptions,
+});
 
 const path = require('path');
 
@@ -48,7 +51,7 @@ app.use(verifyJWT);
 app.use('/contacts', require('./routes/api/contacts'));
 app.use('/chats', require('./routes/api/chats'));
 
-// io.use(verifySocket);
+io.use(verifySocket);
 const activeUsers = new Map();
 
 io.on('connection', (socket) => {
@@ -56,6 +59,10 @@ io.on('connection', (socket) => {
     console.log('new connection');
     activeUsers.set(sender, socket);
 
+    socket.on('test', () => {
+        console.log('socket test');
+        socket.emit('test', 'Hello');
+    });
     socket.on('socket/send_msg', (receiver, msg) => {
         (async () => {
             const res = await socketController.addMessageDB(

@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 
 const handleLogin = async (req, res) => {
     const { user, pwd } = req.body;
-    console.log(user, pwd);
+    // console.log(user, pwd);
     if (!user || !pwd)
         return res
             .status(400)
@@ -37,7 +37,7 @@ const handleLogin = async (req, res) => {
         //save refresh token with current user in DB
         foundUser.refreshToken = refreshToken;
         const result = await foundUser.save();
-        console.log(result);
+        // console.log(result);
 
         // send refreshToken as httpOnly cookie which is more secure as not accessible by the javascript
         res.cookie('jwt', refreshToken, {

@@ -32,6 +32,11 @@ const addContact = async (req, res) => {
         return res.status(400).json({ message: 'Invalid User' });
     }
     //Is contact valid?
+    if (req.body.contact === req.user)
+        return res
+            .status(400)
+            .json({ message: 'Cannot add yourself as contact' });
+
     try {
         const addContact = await User.findOne({
             username: req.body.contact,

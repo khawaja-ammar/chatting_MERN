@@ -1,6 +1,6 @@
-import { useContext, useEffect, useRef, useState, createContext } from 'react';
+import { useContext, useEffect, useState, createContext } from 'react';
 
-import useLocalStorage from '../hooks/useLocalStorage';
+// import useLocalStorage from '../hooks/useLocalStorage';
 
 const AuthContext = createContext();
 
@@ -13,7 +13,6 @@ export function AuthProvider({ children }) {
     // console.log(jwt);
     //AUTHENTICATE FROM SERVER??
 
-    // const authRef = useRef(false);
     const [auth, setAuth] = useState(() => {
         return {
             state: false,
@@ -24,9 +23,7 @@ export function AuthProvider({ children }) {
     // TODO: For refreshing a page
     // get new AccessToken if current one is invalid
 
-    useEffect(() => {
-        // console.log('');
-    }, [auth]);
+    // useEffect(() => {}, [auth]);
     return (
         <AuthContext.Provider value={{ auth, setAuth }}>
             {children}

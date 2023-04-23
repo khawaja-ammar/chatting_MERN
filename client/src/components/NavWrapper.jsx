@@ -9,7 +9,7 @@ export default function NavWrapper() {
     const { auth } = useAuth();
     const displayName = auth.userID;
 
-    console.log('NAV', auth);
+    // console.log('NAV', auth);
 
     return (
         <>

@@ -2,7 +2,7 @@ POST http://www.localhost:3500/register
 content-type: application/json
 
 {
-    "user": "ayesha",
+    "user": "ammar",
     "pwd": "156"
 }
 ###
@@ -10,7 +10,7 @@ POST http://www.localhost:3500/auth
 content-type: application/json
 
 {
-    "user": "ayesha",
+    "user": "ammar",
     "pwd": "156"
 }
 

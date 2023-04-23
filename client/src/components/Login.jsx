@@ -2,8 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 import { useAuth } from '../contexts/AuthProvider';
+import { useSocket } from '../contexts/SocketProvider';
 
 import axios from '../api/axios';
+import { io } from 'socket.io-client';
+import URL from '../api/serverURL';
 
 const LOGIN_URL = '/auth';
 
@@ -11,6 +14,7 @@ const LOGIN_URL = '/auth';
 
 export default function Login() {
     const { setAuth } = useAuth();
+    const { setSocket } = useSocket();
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -33,7 +37,7 @@ export default function Login() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('form sub');
+        console.log('login form sub');
         // communicate with server?
         try {
             const res = await axios.post(
@@ -48,7 +52,7 @@ export default function Login() {
                 }
             );
 
-            console.log('RESP: ', res);
+            console.log('LOGIN RESP: ', res);
 
             setAuth({
                 state: true,
@@ -57,6 +61,21 @@ export default function Login() {
             });
             setUser('');
             setPassword('');
+
+            // TODO: CONNECT TO SOCKET
+            try {
+                const socket = io(URL, {
+                    auth: {
+                        user: user,
+                        token: res.data.accessToken,
+                    },
+                });
+                setSocket(socket);
+            } catch (err) {
+                console.log('ERROR: ', err);
+                setErrMsg('ERROR');
+                errRef.current.focus();
+            }
 
             navigate(from, { replace: true });
         } catch (err) {
