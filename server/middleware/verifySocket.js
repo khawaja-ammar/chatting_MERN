@@ -3,8 +3,8 @@ const jwt = require('jsonwebtoken');
 const verifySocket = (socket, next) => {
     const user = socket.handshake.auth.user;
     const token = socket.handshake.auth.token;
-    console.log(user);
-    console.log(token);
+    // console.log(user);
+    // console.log(token);
 
     if (!token || !user) next(new Error('Authentication error'));
 

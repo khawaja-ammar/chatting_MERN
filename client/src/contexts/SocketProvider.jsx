@@ -1,6 +1,9 @@
-import { useContext, useState, createContext } from 'react';
+import { useContext, createContext } from 'react';
+import { io } from 'socket.io-client';
 
-// import useLocalStorage from '../hooks/useLocalStorage';
+import URL from '../api/serverURL';
+
+import { useAuth } from './AuthProvider';
 
 const SocketContext = createContext();
 
@@ -9,17 +12,18 @@ export function useSocket() {
 }
 
 export function SocketProvider({ children }) {
-    // const [jwt, setJWT] = useLocalStorage('id');
-    // console.log(jwt);
-    //AUTHENTICATE FROM SERVER??
+    const { auth } = useAuth();
 
-    const [socket, setSocket] = useState();
-    // TODO: For refreshing a page
-    // get new AccessToken if current one is invalid
+    const socket = io(URL, {
+        autoConnect: false,
+        auth: {
+            user: auth.userID,
+            token: auth.accessToken,
+        },
+    });
 
-    // useEffect(() => {}, [auth]);
     return (
-        <SocketContext.Provider value={{ socket, setSocket }}>
+        <SocketContext.Provider value={{ socket }}>
             {children}
         </SocketContext.Provider>
     );

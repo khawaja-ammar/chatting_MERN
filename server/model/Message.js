@@ -16,4 +16,7 @@ const messageSchema = new Schema({
     },
 });
 
+// ADD READ STATUS??
+// MAYBE in contacts instead, the last unread message etc
+
 module.exports = messageSchema;

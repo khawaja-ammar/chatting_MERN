@@ -25,7 +25,7 @@ const svgPLUS = (
 
 function AddContactModal({ contacts }) {
     const { auth } = useAuth();
-    const { contactList, setContactList } = contacts;
+    const { setContactList } = contacts;
 
     const [contactInput, setContactInput] = useState('');
     const [msg, setMsg] = useState('');
@@ -48,6 +48,9 @@ function AddContactModal({ contacts }) {
                     withCredentials: true,
                 }
             );
+            setContactList((prev) => {
+                return [...prev, contactInput];
+            });
             setMsg('Contact Added');
             setContactInput('');
         } catch (err) {
@@ -148,7 +151,7 @@ function MakeContacts({ contacts, focus }) {
             {contactList.length ? (
                 <>
                     {contactList.map((contact) => (
-                        <li>
+                        <li key={contact}>
                             <div
                                 className={
                                     contactFocus === contact ? 'active' : ''
@@ -162,7 +165,10 @@ function MakeContacts({ contacts, focus }) {
                                         </span>
                                     </div>
                                 </div>
-                                {contact}
+                                <div className="flex w-full justify-between">
+                                    <div>{contact}</div>
+                                    <div>"DOT"</div>
+                                </div>
                             </div>
                         </li>
                     ))}
@@ -174,10 +180,11 @@ function MakeContacts({ contacts, focus }) {
     );
 }
 
-function MakeChat({ focus }) {
+function MakeChat({ focus, socket, newMsg }) {
     const { auth } = useAuth();
 
-    const [chat, setChats] = useState([]);
+    const [msgInput, setMsgInput] = useState('');
+    const [chats, setChats] = useState([]);
 
     useEffect(() => {
         console.log('making chat for: ', focus);
@@ -193,11 +200,15 @@ function MakeChat({ focus }) {
                     },
                     withCredentials: true,
                 });
-                console.log(res.data);
+                // console.log(res.data);
                 if (!ignore) {
                     // setContactList((prev) => {
                     //     return [...prev, ...res.data.contacts];
                     // });
+                    setChats((prev) => {
+                        // return [...prev, ...res.data.message];
+                        return [...prev, ...res.data.message];
+                    });
                 }
             } catch (err) {
                 console.log('err cant get contacts');
@@ -205,69 +216,124 @@ function MakeChat({ focus }) {
         }
         getChats();
 
+        socket.on('');
+
         return () => {
-            // setContactList([]);
+            setChats([]);
             ignore = true;
         };
     }, [focus]);
 
-    return (
-        // <>
-        //     <div className="chat chat-start">
-        //         <div className="chat-bubble">
-        //             It's over MY {focus}, <br />I have the high ground.
-        //         </div>
-        //     </div>
-        //     <div className="chat chat-end">
-        //         <div className="chat-bubble">You underestimate my power!</div>
-        //     </div>
-        // </>
-        <>
-            <div
-                // w-full
-                className="border-b-4 border-[color:var(--color-border)] "
-            />
-            <div className="p-4">{focus}</div>
-            <div
-                // w-full
-                className="border-b-4 border-[color:var(--color-border)] "
-            />
-            {/* </label> */}
+    useEffect(() => {
+        if (newMsg.sender === focus) {
+            setChats((prev) => {
+                return [
+                    ...prev,
+                    {
+                        creator: newMsg.sender,
+                        time: Date.now(),
+                        content: newMsg.message,
+                    },
+                ];
+            });
+        }
+    }, [newMsg]);
 
+    const handleMessage = async (e) => {
+        e.preventDefault();
+
+        if (msgInput === '') return;
+
+        try {
+            socket.emit(
+                'socket/send_msg',
+                focus,
+                msgInput,
+                function (res, err) {
+                    if (err) {
+                        console.error('There was an error:', err);
+                    } else {
+                        console.log('The server responded with:', res);
+                        setChats((prev) => {
+                            return [
+                                ...prev,
+                                {
+                                    creator: auth.userID,
+                                    time: Date.now(),
+                                    content: msgInput,
+                                },
+                            ];
+                        });
+
+                        setMsgInput('');
+                    }
+                }
+            );
+        } catch (err) {
+            console.error('There was an error:', err);
+        }
+    };
+
+    return (
+        <>
+            <div className="border-b-4 border-[color:var(--color-border)] " />
+            <div className="p-4">{focus}</div>
+            <div className="border-b-4 border-[color:var(--color-border)] " />
             <div className="h-[75vh] overflow-y-scroll px-4 pt-4 ">
                 {/* TODO: Suspense Loading ?? */}
 
                 {/* ADD NO MESSAGE INDICATOR */}
-                <div className="chat chat-start">
-                    <div className="chat-bubble">
-                        It's over MY {focus}, <br />I have the high ground.
-                    </div>
-                </div>
-                <div className="chat chat-end">
-                    <div className="chat-bubble">
-                        You underestimate my power!
-                    </div>
-                </div>
+                {/* {chats.length ? (
+
+                ) : (
+                    <h1>NO Chats</h1>
+                )
+
+            } */}
+                {chats.map((chat) => (
+                    <>
+                        {chat.creator === auth.userID ? (
+                            <div className="chat chat-end">
+                                <div className="chat-bubble">
+                                    {chat.content}
+                                </div>
+                                {/* <div className="chat-footer opacity-50">{}</div> */}
+                            </div>
+                        ) : (
+                            <div className="chat chat-start">
+                                <div className="chat-bubble">
+                                    {chat.content}
+                                </div>
+                                {/* <div className="chat-footer opacity-50">{}</div> */}
+                            </div>
+                        )}
+                    </>
+                ))}
                 {/* <MakeChat focus={focus} /> */}
             </div>
 
-            <div className=" p-4">
+            <form
+                className=" flex justify-between p-4"
+                onSubmit={handleMessage}
+            >
                 <input
                     type="text"
                     placeholder="Type here"
                     className="input-bordered input-secondary input w-9/12 "
+                    value={msgInput}
+                    onChange={(e) => setMsgInput(e.target.value)}
                 />
-            </div>
+                <button className="btn-success btn" type="submit">
+                    SEND
+                </button>
+            </form>
         </>
     );
 }
 
 export default function Dashboard() {
     const { socket } = useSocket();
-    socket.emit('test');
-    socket.on('test', (msg) => {
-        console.log(msg);
-    });
+    const [conn, setConn] = useState(false);
 
     const [contactList, setContactList] = useState(() => {
         return [];
@@ -275,65 +341,112 @@ export default function Dashboard() {
     const [contactFocus, setContactFocus] = useState(() => {
         return '';
     });
-
-    // TODO: SOCKETIO imp
+    const [newMsg, setNewMsg] = useState({ sender: '', message: '' });
     useEffect(() => {
-        return () => {};
+        try {
+            socket.connect();
+
+            socket.on('test', (msg) => {
+                setConn(true);
+            });
+
+            // socket.on('socket/send_msg/resp', (res) => {
+            //     console.log(res);
+            // });
+            socket.on('socket/recv_msg', (sender, msg) => {
+                if (contactList.length && !contactList.includes(sender)) {
+                    // console.log(contactList, sender);
+                    setContactList((prev) => {
+                        return [...prev, sender];
+                    });
+                } else {
+                    console.log('new message from', sender);
+
+                    setNewMsg({ sender: sender, message: msg });
+                }
+            });
+
+            socket.emit('test');
+        } catch {
+            console.log('server error');
+        }
+
+        return () => {
+            // console.log('returning');
+
+            socket.off('test');
+            socket.off('socket/recv_msg');
+
+            socket.disconnect();
+        };
     }, []);
 
     return (
         <>
-            <section className="flex h-full flex-col justify-start">
-                <div className="flex justify-between">
-                    <div className="border- drawer h-[95vh] w-3/12 border-r-4 border-[color:var(--color-border)] bg-base-300 ">
-                        <div className="drawer-side h-auto">
-                            {/* <label
+            {conn ? (
+                <section className="flex h-full flex-col justify-start">
+                    <div className="flex justify-between">
+                        <div className="border- drawer h-[95vh] w-3/12 border-r-4 border-[color:var(--color-border)] bg-base-300 ">
+                            <div className="drawer-side h-auto">
+                                {/* <label
                                 htmlFor="my-drawer-2"
                                 className="drawer-overlay"
                             > */}
-                            <div
-                                // w-full
-                                className="border-b-4 border-[color:var(--color-border)] "
-                            />
+                                <div
+                                    // w-full
+                                    className="border-b-4 border-[color:var(--color-border)] "
+                                />
 
-                            <div className="flex items-center justify-between p-4">
-                                <p>Contacts</p>
-                                <AddContactModal
-                                    contacts={{
-                                        contactList,
-                                        setContactList,
-                                    }}
+                                <div className="flex items-center justify-between p-4">
+                                    <p>Contacts</p>
+                                    <AddContactModal
+                                        contacts={{
+                                            setContactList,
+                                        }}
+                                    />
+                                </div>
+                                <div
+                                    // w-full
+                                    className="border-b-4 border-[color:var(--color-border)] pr-8"
                                 />
+                                {/* </label> */}
+                                <ul className="menu max-h-[75vh] w-auto flex-nowrap overflow-y-scroll text-base-content">
+                                    <MakeContacts
+                                        contacts={{
+                                            contactList,
+                                            setContactList,
+                                        }}
+                                        focus={{
+                                            contactFocus,
+                                            setContactFocus,
+                                        }}
+                                    />
+                                </ul>
                             </div>
-                            <div
-                                // w-full
-                                className="border-b-4 border-[color:var(--color-border)] pr-8"
-                            />
-                            {/* </label> */}
-                            <ul className="menu max-h-[75vh] w-auto flex-nowrap overflow-y-scroll text-base-content">
-                                <MakeContacts
-                                    contacts={{ contactList, setContactList }}
-                                    focus={{ contactFocus, setContactFocus }}
-                                />
-                            </ul>
+                        </div>
+
+                        <div className="w-9/12 ">
+                            {contactFocus === '' ? (
+                                <div className="flex h-[75vh] justify-center text-3xl">
+                                    <span className="self-center">
+                                        SELECT CHAT TO LOAD
+                                    </span>
+                                </div>
+                            ) : (
+                                <>
+                                    <MakeChat
+                                        focus={contactFocus}
+                                        socket={socket}
+                                        newMsg={newMsg}
+                                    />
+                                </>
+                            )}
                         </div>
                     </div>
-
-                    <div className="w-9/12 ">
-                        {contactFocus === '' ? (
-                            <div className="flex h-[75vh] justify-center text-3xl">
-                                <span className="self-center">
-                                    SELECT CHAT TO LOAD
-                                </span>
-                            </div>
-                        ) : (
-                            <>
-                                <MakeChat focus={contactFocus} />
-                            </>
-                        )}
-                    </div>
-                </div>
-            </section>
+                </section>
+            ) : (
+                <h1>Loading ... </h1>
+            )}
         </>
     );
 }

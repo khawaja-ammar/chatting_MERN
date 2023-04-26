@@ -51,20 +51,23 @@ app.use(verifyJWT);
 app.use('/contacts', require('./routes/api/contacts'));
 app.use('/chats', require('./routes/api/chats'));
 
+// Verify Socket
 io.use(verifySocket);
 const activeUsers = new Map();
 
+// IO Routes + Controllers
 io.on('connection', (socket) => {
     const sender = socket.handshake.auth.user;
-    console.log('new connection');
+    console.log('new connection', socket.id, sender);
     activeUsers.set(sender, socket);
 
     socket.on('test', () => {
         console.log('socket test');
         socket.emit('test', 'Hello');
     });
-    socket.on('socket/send_msg', (receiver, msg) => {
-        (async () => {
+    socket.on('socket/send_msg', (receiver, msg, callback) => {
+        console.log('sending msg', msg);
+        const addMessage = async () => {
             const res = await socketController.addMessageDB(
                 sender,
                 receiver,
@@ -75,8 +78,9 @@ io.on('connection', (socket) => {
                 const sendSocket = activeUsers.get(receiver);
                 if (sendSocket) sendSocket.emit('socket/recv_msg', sender, msg);
             }
-            socket.emit('socket/send_msg/resp', res);
-        })();
+            callback(res);
+        };
+        addMessage();
     });
 
     socket.on('disconnect', () => {

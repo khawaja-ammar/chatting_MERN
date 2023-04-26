@@ -2,6 +2,7 @@ import { Outlet, Route, Routes } from 'react-router-dom';
 // import './App.css';
 
 // import { useAuth } from './contexts/AuthProvider';
+import { SocketProvider } from './contexts/SocketProvider';
 
 import RequireAuth from './components/RequireAuth';
 
