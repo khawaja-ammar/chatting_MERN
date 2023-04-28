@@ -12,6 +12,12 @@ const contactSchema = new Schema({
         type: [messageSchema],
         default: undefined,
     },
+    lastMessageTime: {
+        type: Date,
+    },
+    lastMessageRead: Boolean,
 });
+
+// Add last message Date + read status
 
 module.exports = contactSchema;

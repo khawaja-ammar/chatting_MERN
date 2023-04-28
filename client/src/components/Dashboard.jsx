@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../contexts/AuthProvider';
 import { useSocket } from '../contexts/SocketProvider';
 import axios from '../api/axios';
@@ -46,10 +46,17 @@ function AddContactModal({ contacts }) {
                         Authorization: `Bearer ${auth.accessToken}`,
                     },
                     withCredentials: true,
-                }
+                },
             );
             setContactList((prev) => {
-                return [...prev, contactInput];
+                return [
+                    ...prev,
+                    {
+                        username: contactInput,
+                        lastMessageTime: null,
+                        lastMessageRead: true,
+                    },
+                ];
             });
             setMsg('Contact Added');
             setContactInput('');
@@ -112,8 +119,8 @@ function AddContactModal({ contacts }) {
 
 function MakeContacts({ contacts, focus }) {
     const { auth } = useAuth();
-    const { contactList, setContactList } = contacts;
-    const { contactFocus, setContactFocus } = focus;
+    const { contactList, setContactList, setContactsRecv } = contacts;
+    const { focusVal, contactFocus, setContactFocus } = focus;
 
     useEffect(() => {
         let ignore = false;
@@ -130,9 +137,11 @@ function MakeContacts({ contacts, focus }) {
                 });
 
                 if (!ignore) {
+                    console.log(res.data.contacts);
                     setContactList((prev) => {
                         return [...prev, ...res.data.contacts];
                     });
+                    setContactsRecv(true);
                 }
             } catch (err) {
                 console.log('err cant get contacts');
@@ -150,24 +159,39 @@ function MakeContacts({ contacts, focus }) {
         <>
             {contactList.length ? (
                 <>
-                    {contactList.map((contact) => (
-                        <li key={contact}>
+                    {contactList.map((contact, index) => (
+                        <li key={`${index}_contact`}>
                             <div
                                 className={
-                                    contactFocus === contact ? 'active' : ''
+                                    contactFocus === contact.username
+                                        ? 'active'
+                                        : ''
                                 }
-                                onClick={() => setContactFocus(contact)}
+                                onClick={() => {
+                                    setContactFocus(contact.username);
+                                    focusVal.current = contact.username;
+                                    console.log(focusVal.current);
+                                }}
                             >
                                 <div className="placeholder avatar">
                                     <div className="w-8 rounded-full bg-neutral-focus text-neutral-content">
                                         <span className="text-xs">
-                                            {contact[0].toUpperCase()}
+                                            {contact.username[0].toUpperCase()}
                                         </span>
                                     </div>
                                 </div>
-                                <div className="flex w-full justify-between">
-                                    <div>{contact}</div>
-                                    <div>"DOT"</div>
+                                <div className="flex w-full items-center justify-between">
+                                    <div>{contact.username}</div>
+                                    <div>
+                                        {!contact.lastMessageRead ? (
+                                            <div
+                                                className="h-2 w-2 rounded-full bg-green-600
+                                            "
+                                            ></div>
+                                        ) : (
+                                            <></>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </li>
@@ -180,8 +204,10 @@ function MakeContacts({ contacts, focus }) {
     );
 }
 
-function MakeChat({ focus, socket, newMsg }) {
+function MakeChat({ focus, socket, newMsg, contacts }) {
     const { auth } = useAuth();
+
+    const { contactList, setContactList } = contacts;
 
     const [msgInput, setMsgInput] = useState('');
     const [chats, setChats] = useState([]);
@@ -202,13 +228,25 @@ function MakeChat({ focus, socket, newMsg }) {
                 });
                 // console.log(res.data);
                 if (!ignore) {
-                    // setContactList((prev) => {
-                    //     return [...prev, ...res.data.contacts];
-                    // });
                     setChats((prev) => {
-                        // return [...prev, ...res.data.message];
                         return [...prev, ...res.data.message];
                     });
+
+                    // TODO: Message Read
+                    let i;
+                    for (i = 0; i < contactList.length; i++) {
+                        if (contactList[i].username === focus) {
+                            break;
+                        }
+                    }
+                    setContactList((prev) => {
+                        const newArr = [...prev];
+                        newArr[i].lastMessageRead = true;
+                        return newArr;
+                    });
+
+                    // TODO: tell server to make it read
+                    // let tempContact
                 }
             } catch (err) {
                 console.log('err cant get contacts');
@@ -224,6 +262,7 @@ function MakeChat({ focus, socket, newMsg }) {
         };
     }, [focus]);
 
+    // FIXME: reset this
     useEffect(() => {
         if (newMsg.sender === focus) {
             setChats((prev) => {
@@ -237,6 +276,9 @@ function MakeChat({ focus, socket, newMsg }) {
                 ];
             });
         }
+        // return () => {
+        //     setChats([]);
+        // };
     }, [newMsg]);
 
     const handleMessage = async (e) => {
@@ -267,7 +309,7 @@ function MakeChat({ focus, socket, newMsg }) {
 
                         setMsgInput('');
                     }
-                }
+                },
             );
         } catch (err) {
             console.error('There was an error:', err);
@@ -277,9 +319,9 @@ function MakeChat({ focus, socket, newMsg }) {
     return (
         <>
             <div className="border-b-4 border-[color:var(--color-border)] " />
-            <div className="p-4">{focus}</div>
+            <div className="bg-base-300 p-4">{focus}</div>
             <div className="border-b-4 border-[color:var(--color-border)] " />
-            <div className="h-[75vh] overflow-y-scroll px-4 pt-4 ">
+            <div className="h-[80vh] overflow-y-scroll px-4 pt-4 ">
                 {/* TODO: Suspense Loading ?? */}
 
                 {/* ADD NO MESSAGE INDICATOR */}
@@ -290,17 +332,17 @@ function MakeChat({ focus, socket, newMsg }) {
                 )
 
             } */}
-                {chats.map((chat) => (
+                {chats.map((chat, index) => (
                     <>
                         {chat.creator === auth.userID ? (
-                            <div className="chat chat-end">
+                            <div key={index} className="chat chat-end">
                                 <div className="chat-bubble">
                                     {chat.content}
                                 </div>
                                 {/* <div className="chat-footer opacity-50">{}</div> */}
                             </div>
                         ) : (
-                            <div className="chat chat-start">
+                            <div key={index} className="chat chat-start">
                                 <div className="chat-bubble">
                                     {chat.content}
                                 </div>
@@ -313,13 +355,13 @@ function MakeChat({ focus, socket, newMsg }) {
             </div>
 
             <form
-                className=" flex justify-between p-4"
+                className="flex justify-between gap-2 bg-base-300 p-4 px-1 py-1"
                 onSubmit={handleMessage}
             >
                 <input
                     type="text"
                     placeholder="Type here"
-                    className="input-bordered input-secondary input w-9/12 "
+                    className="input-bordered input-secondary input w-full "
                     value={msgInput}
                     onChange={(e) => setMsgInput(e.target.value)}
                 />
@@ -335,13 +377,14 @@ export default function Dashboard() {
     const { socket } = useSocket();
     const [conn, setConn] = useState(false);
 
-    const [contactList, setContactList] = useState(() => {
-        return [];
-    });
-    const [contactFocus, setContactFocus] = useState(() => {
-        return '';
-    });
+    const [contactsRecv, setContactsRecv] = useState(false);
+    const [contactList, setContactList] = useState([]);
+
+    const [contactFocus, setContactFocus] = useState('');
     const [newMsg, setNewMsg] = useState({ sender: '', message: '' });
+
+    const focusVal = useRef('');
+
     useEffect(() => {
         try {
             socket.connect();
@@ -350,20 +393,39 @@ export default function Dashboard() {
                 setConn(true);
             });
 
-            // socket.on('socket/send_msg/resp', (res) => {
-            //     console.log(res);
-            // });
-            socket.on('socket/recv_msg', (sender, msg) => {
-                if (contactList.length && !contactList.includes(sender)) {
-                    // console.log(contactList, sender);
-                    setContactList((prev) => {
-                        return [...prev, sender];
-                    });
-                } else {
-                    console.log('new message from', sender);
+            socket.on('socket/new_contact_msg', (sender) => {
+                console.log('adding new contact', sender);
+                setContactList((prev) => {
+                    return [
+                        ...prev,
+                        {
+                            username: sender,
+                            lastMessageRead: true,
+                            lastMessageTime: null,
+                        },
+                    ];
+                });
+            });
 
-                    setNewMsg({ sender: sender, message: msg });
+            socket.on('socket/recv_msg', (sender, msg) => {
+                // console.log(contactList);
+                console.log(focusVal.current, sender);
+                if (focusVal.current !== sender) {
+                    let i;
+                    for (i = 0; i < contactList.length; i++) {
+                        if (contactList[i].username === sender) {
+                            break;
+                        }
+                    }
+                    setContactList((prev) => {
+                        const newArr = [...prev];
+                        newArr[i].lastMessageRead = false;
+                        return newArr;
+                    });
                 }
+
+                console.log('new message from', sender);
+                setNewMsg({ sender: sender, message: msg });
             });
 
             socket.emit('test');
@@ -375,11 +437,12 @@ export default function Dashboard() {
             // console.log('returning');
 
             socket.off('test');
+            socket.off('socket/new_contact_msg');
             socket.off('socket/recv_msg');
 
             socket.disconnect();
         };
-    }, []);
+    }, [contactsRecv]);
 
     return (
         <>
@@ -415,8 +478,10 @@ export default function Dashboard() {
                                         contacts={{
                                             contactList,
                                             setContactList,
+                                            setContactsRecv,
                                         }}
                                         focus={{
+                                            focusVal,
                                             contactFocus,
                                             setContactFocus,
                                         }}
@@ -438,6 +503,10 @@ export default function Dashboard() {
                                         focus={contactFocus}
                                         socket={socket}
                                         newMsg={newMsg}
+                                        contacts={{
+                                            contactList,
+                                            setContactList,
+                                        }}
                                     />
                                 </>
                             )}

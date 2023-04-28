@@ -1,5 +1,7 @@
 const User = require('../model/User');
 
+const activeUsers = global.activeUsersMap;
+
 const addMessageDB = async (sender, receiver, msg) => {
     console.log(receiver, 'recvs from', sender, msg);
     let senderUser;
@@ -9,17 +11,17 @@ const addMessageDB = async (sender, receiver, msg) => {
         return 'Invalid User';
     }
 
-    if (senderUser.contacts.length == 0) return 'No contacts';
+    if (senderUser.contacts.length === 0) return 'No contacts';
 
     let indexSender = 0;
     let check = false;
 
     while (indexSender < senderUser.contacts.length) {
-        if (senderUser.contacts[indexSender].username == receiver) {
+        if (senderUser.contacts[indexSender].username === receiver) {
             check = true;
             break;
         }
-        indexSender++;
+        indexSender += 1;
     }
 
     if (!check) return 'Person not in your contacts';
@@ -35,30 +37,38 @@ const addMessageDB = async (sender, receiver, msg) => {
     check = false;
 
     while (indexRecv < receiverUser.contacts.length) {
-        if (receiverUser.contacts[indexRecv].username == sender) {
+        if (receiverUser.contacts[indexRecv].username === sender) {
             check = true;
             break;
         }
-        indexRecv++;
+        indexRecv += 1;
     }
 
     if (!check) {
-        //create contact
+        // create contact
+        console.log(receiverUser.contacts);
         const entry = {
             username: sender,
         };
         receiverUser.contacts.push(entry);
+
         try {
-            const result = await receiverUser.save();
+            await receiverUser.save();
+            console.log(activeUsers);
+            const soc = activeUsers.get(receiver);
+            if (soc !== undefined) {
+                console.log('Emitting to add contact', receiver);
+                soc.emit('socket/new_contact_msg', sender);
+            }
         } catch (err) {
-            return 'Cannot reach User in DB';
+            return `Cannot reach User in DB ${err}`;
         }
     }
     // Create Chatroom
-    if (!senderUser.contacts[indexSender]?.chat) {
+    if (!senderUser.contacts[indexSender].chat) {
         senderUser.contacts[indexSender].chat = [];
     }
-    if (!receiverUser.contacts[indexRecv]?.chat) {
+    if (!receiverUser.contacts[indexRecv].chat) {
         receiverUser.contacts[indexRecv].chat = [];
     }
 
